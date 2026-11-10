@@ -1,0 +1,70 @@
+// CONTINUAÇÃO DO CÓDIGO - SCRIPT PRINCIPAL
+
+        ll h-full object-cover group-hover:scale-105 transition-transform duration-500">
+        <span class="absolute top-2 left-2 px-2.5 py-1 rounded-full bg-royalDark-950/80 backdrop-blur-md text-[9px] font-bold text-goldAccent-400 border border-goldAccent-500/30 uppercase tracking-wider">${i.tag}</span>
+    </div>
+    <div class="space-y-1">
+        <h4 class="font-serif font-bold text-white text-base">${i.title}</h4>
+        <p class="text-xs text-gray-300 font-light line-clamp-2">${i.desc}</p>
+    </div>
+    <div class="flex items-center justify-between pt-2 border-t border-royalDark-800">
+        <span class="font-bold text-goldAccent-400 text-sm">R$ ${i.price.toFixed(2)}</span>
+        <div class="flex items-center gap-2">
+            <button onclick="addToCartDirect(${i.id})" class="p-2 rounded-lg bg-sapphire-600/30 text-goldAccent-400 hover:bg-sapphire-600 hover:text-white transition-all">
+                <i class="fa-solid fa-plus text-xs"></i>
+            </button>
+            <button onclick="openModal(${i.id})" class="px-3 py-1.5 rounded-lg bg-royalDark-950 text-gray-200 text-xs font-semibold hover:bg-royalDark-800 transition-all border border-sapphire-500/30">Detalhes</button>
+        </div>
+    </div>
+</div>
+`).join('');
+}
+
+// MODAL DE DETALHES DO ITEM
+function openModal(id) {
+    selectedItem = MENU.find(i => i.id === id);
+    if (!selectedItem) return;
+
+    document.getElementById('modal-img').src = selectedItem.img;
+    document.getElementById('modal-tag').innerText = selectedItem.tag;
+    document.getElementById('modal-title').innerText = selectedItem.title;
+    document.getElementById('modal-price').innerText = `R$ ${selectedItem.price.toFixed(2)}`; document.getElementById('modal-desc').innerText = selectedItem.desc;  document.getElementById('item-modal').classList.remove('hidden'); }  function closeModal(modalId) { const modal = document.getElementById(modalId); if (modal) modal.classList.add('hidden'); }  function addModalItemToCart() { if (selectedItem) { addToCartDirect(selectedItem.id); closeModal('item-modal'); } }  // SISTEMA DO CARRINHO DE PEDIDOS function addToCartDirect(id) { const item = MENU.find(i => i.id === id); if (!item) return;  const existing = cart.find(c => c.id === id); if (existing) { existing.qty += 1; } else { cart.push({ ...item, qty: 1 }); }  updateCartUI(); showToast(`" ${item.title} " adicionado ao seu pedido!`);
+}
+
+function updateCartQty(id, delta) {
+    const item = cart.find(c => c.id === id);
+    if (!item) return;
+
+    item.qty += delta;
+    if (item.qty <= 0) {
+        cart = cart.filter(c => c.id !== id);
+    }
+    updateCartUI();
+}
+
+function updateCartUI() {
+    const container = document.getElementById('cart-items');
+    const badge = document.getElementById('cart-badge-count');
+    const totalEl = document.getElementById('cart-total-val');
+
+    const totalQty = cart.reduce((acc, i) => acc + i.qty, 0);
+    const totalPrice = cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
+
+    if (badge) badge.innerText = totalQty;
+    if (totalEl) totalEl.innerText = `R$ ${totalPrice.toFixed(2)}`;
+
+    if (!container) return;
+
+    if (cart.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-12 space-y-2">
+                <i class="fa-solid fa-wine-glass text-3xl text-royalDark-700"></i>
+                <p class="text-xs text-gray-400 font-light">Seu pedido VIP está vazio.</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = cart.map(i => `
+        <div class="flex items-center justify-between p-3 rounded-2xl bg-royalDark-950/70 border border-sapphire-500/20">
+            <div class="space-y-0.5 max-w-[60%]
